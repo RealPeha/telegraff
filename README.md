@@ -1,5 +1,5 @@
-## Telewrap
-Telewrap - this is a framework for creating bots using decorators in a style similar to Angular. Based on [Telegraf](https://github.com/telegraf/telegraf "Telegraf")
+## Telegraff
+Telegraff - this is a framework for creating bots using decorators in a style similar to Angular. Based on [Telegraf](https://github.com/telegraf/telegraf "Telegraf")
 
 ### Implemented from Telegraf and features
 - Dependency injection
@@ -11,16 +11,16 @@ Telewrap - this is a framework for creating bots using decorators in a style sim
 ### Installation
 
 ```
-$ yarn add telewrap
+$ yarn add telegraff
 ```
 
 ### Simple example bot
-You can find more cool examples in the [examples](https://github.com/RealPeha/telewrap/tree/master/examples "examples") folder
+You can find more cool examples in the [examples](https://github.com/RealPeha/telegraff/tree/master/examples "examples") folder
 
 ```javascript
 import { session } from 'telegraf';
-import { BotFactory } from 'telewrap';
-import { Bot, Command, On, UseMiddlewares } from 'telewrap/common';
+import { BotFactory } from 'telegraff';
+import { Bot, Command, On, UseMiddlewares } from 'telegraff/common';
 
 @Bot({
     middlewares: [ session() ] // register global middleware
@@ -42,7 +42,7 @@ bot.launch()
 #### Create scenes
 ```javascript
 // welcome-scene.ts
-import { Scene, Enter } from 'telewrap'
+import { Scene, Enter } from 'telegraff'
 
 @Scene('welcome')
 export class WelcomeScene {
@@ -76,7 +76,7 @@ export class BotModule {
 #### Dependency injection (Services)
 ```javascript
 // db-service.ts
-import { Injectable, Enter } from 'telewrap'
+import { Injectable, Enter } from 'telegraff'
 
 @Injectable()
 export class DBService {
@@ -91,7 +91,7 @@ export class DBService {
 }
 
 // bot-module.ts
-import { Bot, Start } from 'telewrap';
+import { Bot, Start } from 'telegraff';
 import { DBService } from './db-service'
 
 @Bot()
