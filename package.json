@@ -1,0 +1,39 @@
+{
+  "name": "telegraff",
+  "version": "1.1.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "author": "Stanislav Kardash <real.peha@gmail.com>",
+  "homepage": "https://github.com/RealPeha/telegraff#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RealPeha/telegraff.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RealPeha/telegraff/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {
+    "start": "yarn dev",
+    "dev": "tsc -w",
+    "build": "tsc && cp ./package.json dist && cp ./README.md dist",
+    "build-win": "tsc && copy package.json dist && copy README.md dist"
+  },
+  "dependencies": {
+    "@types/node": "^12.12.12",
+    "reflect-metadata": "^0.1.13",
+    "telegraf": "^3.34.1",
+    "typescript": "^3.7.2"
+  },
+  "keywords": [
+    "telegraf",
+    "telegram",
+    "telegram bot api",
+    "bot",
+    "botapi",
+    "bot framework"
+  ]
+}
