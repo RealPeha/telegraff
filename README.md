@@ -46,9 +46,7 @@ import { Bot } from 'telegraff/common/class';
 import { hears, command } from 'telegraff/common/property';
 
 
-@Bot({
-    middlewares: [ session() ]
-})
+@Bot()
 export class BotModule {
     static token = '283850275:AAE2ijl1gsSpidVCxTTaeAz_7i9Jt71wY88'
 
