@@ -38,6 +38,32 @@ bot.setGlobalParseMode('HTML') // set global parse mode
 bot.launch()
 ```
 
+### Very simple example bot
+```javascript
+import { session } from 'telegraf';
+import { BotFactory } from 'telegraff';
+import { Bot } from 'telegraff/common/class';
+import { hears, command } from 'telegraff/common/property';
+
+
+@Bot({
+    middlewares: [ session() ]
+})
+export class BotModule {
+    static token = '283850275:AAE2ijl1gsSpidVCxTTaeAz_7i9Jt71wY88'
+
+    start = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
+	// or
+	// @start blabla = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
+	@command ping = ({ reply }) => reply('pong')
+	@hears 'Hello World' = () => console.log('hello')
+
+}
+const bot = BotFactory.create(BotModule)
+bot.setGlobalParseMode('HTML') // set global parse mode
+bot.launch()
+```
+
 ### Base examples
 #### Create scenes
 ```javascript
