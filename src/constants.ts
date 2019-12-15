@@ -4,4 +4,5 @@ export const WIZARD_SCENE = '__wizardScene__';
 export const MIDDLEWARES = '__middlewares__';
 export const COMPOSER = '__composer__';
 
-export const HANDLER = '__handler__';
+export const METHOD_HANDLER = '__methodHandler__';
+export const PROPERTY_HANDLER = '__propertyHandler__';

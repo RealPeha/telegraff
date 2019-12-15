@@ -1,4 +1,4 @@
-import { HANDLER } from '../../constants'
+import { METHOD_HANDLER } from '../../constants'
 import { HearsTriggers } from 'telegraf'
 import { Metadata } from '../../utils'
 
@@ -16,6 +16,6 @@ export const Action = (trigger: HearsTriggers): MethodDecorator => {
                 })
             }
         }
-        Metadata.extendArray(HANDLER, [{ type: 'action', trigger, handler: descriptor.value }], target)
+        Metadata.extendArray(METHOD_HANDLER, [{ type: 'action', trigger, handler: descriptor.value }], target)
     }
 }

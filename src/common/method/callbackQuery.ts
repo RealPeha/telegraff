@@ -1,4 +1,4 @@
-import { HANDLER } from '../../constants';
+import { METHOD_HANDLER } from '../../constants';
 import { Metadata } from '../../utils';
 
 export const CallbackQuery = (): MethodDecorator => {
@@ -15,6 +15,6 @@ export const CallbackQuery = (): MethodDecorator => {
                 })
             }
         }
-        Metadata.extendArray(HANDLER, [{ type: 'on', trigger: 'callback_query', handler: descriptor.value }], target)
+        Metadata.extendArray(METHOD_HANDLER, [{ type: 'on', trigger: 'callback_query', handler: descriptor.value }], target)
     }
 }
