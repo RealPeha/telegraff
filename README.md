@@ -53,11 +53,10 @@ export class BotModule {
     static token = '283850275:AAE2ijl1gsSpidVCxTTaeAz_7i9Jt71wY88'
 
     start = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
-	// or
-	// @start blabla = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
-	@command ping = ({ reply }) => reply('pong')
-	@hears 'Hello World' = () => console.log('hello')
-
+    // or
+    // @start blabla = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
+    @command ping = ({ reply }) => reply('pong')
+    @hears 'Hello World' = () => console.log('hello')
 }
 const bot = BotFactory.create(BotModule)
 bot.setGlobalParseMode('HTML') // set global parse mode
