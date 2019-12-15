@@ -136,7 +136,7 @@ export class BotModule {
 
 #### Set global parse_mode
 ```javascript
-const bot = BotFactory.create(token, BotModule)
+const bot = BotFactory.create(BotModule, token)
 bot.setGlobalParseMode('HTML')
 bot.launch()
 ```
