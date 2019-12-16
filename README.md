@@ -41,10 +41,8 @@ bot.launch()
 ### Very simple example bot
 ```javascript
 import { session } from 'telegraf';
-import { BotFactory } from 'telegraff';
-import { Bot } from 'telegraff/common/class';
-import { hears, command } from 'telegraff/common/property';
-
+import { BotFactory, Bot, hears, command } from 'telegraff';
+import { reply } from 'telegraff/helpers';
 
 @Bot()
 export class BotModule {
@@ -53,7 +51,7 @@ export class BotModule {
     start = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
     // or
     // @start blabla = ({ reply, from }) => reply(`Hello <b>${from.username}</b>`)
-    @command ping = ({ reply }) => reply('pong')
+    @command ping = reply('pong')
     @hears 'Hello World' = () => console.log('hello')
 }
 const bot = BotFactory.create(BotModule)
