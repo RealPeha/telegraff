@@ -56,7 +56,3 @@ export const help = (target: any, propertyKey: string) => {
 export const settings = (target: any, propertyKey: string) => {
     extendMetadata('command',  [propertyKey, 'settings'], target, true)
 }
-
-export const middleware = (target: any, propertyKey: string) => {
-    extendMetadata('use',  [propertyKey], target)
-}

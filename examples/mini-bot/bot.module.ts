@@ -1,14 +1,14 @@
 import { session } from 'telegraf'
-
 import { Bot, Scene } from '../../src'
-import { command, on, middleware, start } from '../../src/common/property'
+import { command, on, start } from '../../src/common/property'
+import { enter, leave, reply } from '../../src/helpers'
 
 @Scene('test')
 class WelcomeScene {
-    enter = ({ reply }) => reply('Добро пожаловать! Введи /hello или /goodbye')
-    leave = ({ reply }) => reply('Пока')
-    @command hello = ({ reply }) => reply('Привет!')
-    @command goodbye = ({ scene }) => scene.leave()
+    enter = reply('Добро пожаловать! Введи /hello или /goodbye')
+    leave = reply('Пока')
+    @command hello = reply('Привет!')
+    @command goodbye = leave()
 }
 
 @Bot({
@@ -16,10 +16,7 @@ class WelcomeScene {
     scenes: [ WelcomeScene ],
 })
 export class BotModule {
-    @middleware test = (ctx, next) => {
-        console.log('test middleware')
-        next()
-    }
-    @start blabla = ({ scene }) => scene.enter('test')
-    @on message = ({ reply }) => reply('Я не понимаю тебя')
+    @start blabla = reply('Try /go')
+    @command go = enter('test')
+    @on message = reply('Я не понимаю тебя')
 }
