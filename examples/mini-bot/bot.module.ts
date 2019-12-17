@@ -1,6 +1,6 @@
 import { session } from 'telegraf'
 import { Bot, Scene } from '../../src'
-import { command, on, start } from '../../src/common/property'
+import { command, on, start, hook } from '../../src/common/property'
 import { enter, leave, reply } from '../../src/helpers'
 
 @Scene('test')
@@ -16,7 +16,11 @@ class WelcomeScene {
     scenes: [ WelcomeScene ],
 })
 export class BotModule {
-    @start blabla = reply('Try /go')
+    static token = process.env.BOT_TOKEN
+
+    @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name || ''}`
+
+    @start blabla = (ctx, { fullName }) => ctx.reply(`Hello ${fullName}! Try /go`)
     @command go = enter('test')
     @on message = reply('Я не понимаю тебя')
 }

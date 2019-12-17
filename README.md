@@ -4,6 +4,7 @@ Telegraff - this is a framework for creating bots using decorators in a style si
 ### Implemented from Telegraf and features
 - Dependency injection
 - Services
+- Hooks
 - Global extra parameters
 - Scenes
 - Wizard scenes
@@ -26,14 +27,13 @@ import { Bot, Command, On, UseMiddlewares } from 'telegraff/common';
     middlewares: [ session() ] // register global middleware
 })
 export class BotModule {
-    static token = '283850275:AAE2ijl1gsSpidVCxTTaeAz_7i9Jt71wY88'
-
     @Start()
     start({ reply, from }) {
         reply(`Hello <b>${from.username}</b>`);
     }
 }
-const bot = BotFactory.create(BotModule)
+const token = '283850275:AAE2ijl1gsSpidVCxTTaeAz_7i9Jt71wY88'
+const bot = BotFactory.create(BotModule, token)
 bot.setGlobalParseMode('HTML') // set global parse mode
 bot.launch()
 ```

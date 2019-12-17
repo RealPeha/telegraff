@@ -6,3 +6,5 @@ export const COMPOSER = '__composer__';
 
 export const METHOD_HANDLER = '__methodHandler__';
 export const PROPERTY_HANDLER = '__propertyHandler__';
+
+export const HOOK = '__hook__';

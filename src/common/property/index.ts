@@ -1,4 +1,4 @@
-import { PROPERTY_HANDLER } from '../../constants';
+import { PROPERTY_HANDLER, HOOK } from '../../constants';
 import { Metadata } from '../../utils';
 
 const extendMetadata = (type, property, target, isProperty = false) => {
@@ -55,4 +55,8 @@ export const help = (target: any, propertyKey: string) => {
 
 export const settings = (target: any, propertyKey: string) => {
     extendMetadata('command',  [propertyKey, 'settings'], target, true)
+}
+
+export const hook = (target: any, propertyKey: string) => {
+    Metadata.extendArray(HOOK, [propertyKey], target)
 }
