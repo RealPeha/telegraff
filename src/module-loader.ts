@@ -98,7 +98,7 @@ export class ModuleLoader {
         const valueHandlers = Object.getOwnPropertyNames(instance)
             .filter(handler => !propertyHandlers.some(property => handler === property.property))
 
-        const callWithCtx = (ctx, handle) => {
+        const callWithCtx = (ctx, next, handle) => {
             const hooksResult = hooks.reduce((prevHook: object, hook: string | [string, (arg1: any, arg2: object) => void]) => {
                 if (Array.isArray(hook)) {
                     return {
@@ -111,22 +111,24 @@ export class ModuleLoader {
                     [hook]: instance[hook](ctx, prevHook),
                 }
             }, {})
-
+            if (next) {
+                return handle(ctx, next, hooksResult)
+            }
             return handle(ctx, hooksResult)
         }
 
         valueHandlers.forEach(handler => {
             if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
-                entity[handler](ctx => callWithCtx(ctx, instance[handler]))
+                entity[handler]((ctx, next) => callWithCtx(ctx, next, instance[handler]))
             }
         })
 
         propertyHandlers.forEach(handler => {
             if (typeof entity[handler.type] === 'function' && typeof instance[handler.property] === 'function') {
                 if (handler.trigger) {
-                    entity[handler.type](handler.trigger, ctx => callWithCtx(ctx, instance[handler.property]))
+                    entity[handler.type](handler.trigger, (ctx, next) => callWithCtx(ctx, next, instance[handler.property]))
                 } else {
-                    entity[handler.type](ctx => callWithCtx(ctx, instance[handler.property]))
+                    entity[handler.type]((ctx, next) => callWithCtx(ctx, next, instance[handler.property]))
                 }
             }
         })
@@ -134,7 +136,7 @@ export class ModuleLoader {
         methodHandlers.forEach(handler => {
             const middlewares = Metadata.get(C.MIDDLEWARES, handler.handler)
 
-            const bindHandler = ctx => callWithCtx(ctx, handler.handler.bind(instance))
+            const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance))
 
             if (handler.trigger) {
                 if (middlewares) {
