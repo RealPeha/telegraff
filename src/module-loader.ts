@@ -90,15 +90,27 @@ export class ModuleLoader {
 
         const methodHandlers = Metadata.get(C.METHOD_HANDLER, prototype) || []
         const propertyHandlers = Metadata.get(C.PROPERTY_HANDLER, prototype) || []
-        const hooks = Metadata.get(C.HOOK, prototype) || []
+
+        const objectHooks = { ...instance.hooks } || {}
+        const userHooks = Metadata.get(C.HOOK, prototype) || []
+        const hooks = [ ...Object.entries(objectHooks), ...userHooks ]
+
         const valueHandlers = Object.getOwnPropertyNames(instance)
             .filter(handler => !propertyHandlers.some(property => handler === property.property))
 
         const callWithCtx = (ctx, handle) => {
-            const hooksResult = hooks.reduce((prevHook: object, hook: string) => ({
-                ...prevHook,
-                [hook]: instance[hook](ctx, prevHook),
-            }), {})
+            const hooksResult = hooks.reduce((prevHook: object, hook: string | [string, (arg1: any, arg2: object) => void]) => {
+                if (Array.isArray(hook)) {
+                    return {
+                        ...prevHook,
+                        [hook[0]]: hook[1](ctx, prevHook),
+                    }
+                }
+                return {
+                    ...prevHook,
+                    [hook]: instance[hook](ctx, prevHook),
+                }
+            }, {})
 
             return handle(ctx, hooksResult)
         }

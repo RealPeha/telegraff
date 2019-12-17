@@ -88,6 +88,38 @@ export class BotModule {
     }
 }
 ```
+If the names of the hooks conflict with the names of the handlers, you can declare them in the hooks property
+```javascript
+export class BotModule {
+    static token = 'telegram_bot_token_here'
+
+    hooks = {
+        id: ctx => ctx.from.id
+        reply: ctx => (...args) => ctx.reply(args)
+    }
+
+    // and use them like normal
+    start = (ctx, { id, reply }) => {}
+}
+```
+In the same way you can connect a set of built-in hooks
+```javascript
+import hooks from 'telegraff/hooks'
+
+export class BotModule {
+    static token = 'telegram_bot_token_here'
+
+    hooks = hooks
+    // or
+    hooks = {
+        ...hooks,
+        myHook: ctx => ctx.session.jopa
+    }
+
+    // and use them like normal
+    start = (ctx, { id, reply, myHook }) => {}
+}
+```
 #### Create scenes
 ```javascript
 // welcome-scene.ts
