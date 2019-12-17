@@ -60,6 +60,34 @@ bot.launch()
 ```
 
 ### Base examples
+#### Hooks
+A hook is a function that has access to the current context.
+```javascript
+import { session } from 'telegraf'
+import { Bot } from '../../src'
+import { command, on, start, hook } from '../../src/common/property'
+
+@Bot({
+	middlewares: [ session() ],
+})
+export class BotModule {
+    static token = 'telegram_bot_token_here'
+
+    @hook id = ctx => ctx.from.id // hook as const value
+    @hook reply = ctx => (...args) => ctx.reply(args) // hook as function
+    @hook increase = ctx => (value = 1) => ctx.session.count += value
+
+    // all hooks are available as an object, the second argument is all handlers
+    start = (ctx, { id, reply }) => {
+        reply(`Your id: ${id}`) // use hook reply and id
+        ctx.session.count = 0
+    }
+    @command add = (ctx, { increase, reply }) => {
+        increase()
+        reply(`Amount: ${ctx.session.count}`)
+    }
+}
+```
 #### Create scenes
 ```javascript
 // welcome-scene.ts
