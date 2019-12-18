@@ -6,6 +6,7 @@ import { Metadata } from './utils';
 import * as C from './constants';
 import { injector } from './injector';
 import { BotInstance } from './bot-instance';
+// const { parse } = require('regexp-tree')
 
 export class ModuleLoader {
     constructor(private readonly container: BotContainer) {}
@@ -91,44 +92,63 @@ export class ModuleLoader {
         const methodHandlers = Metadata.get(C.METHOD_HANDLER, prototype) || []
         const propertyHandlers = Metadata.get(C.PROPERTY_HANDLER, prototype) || []
 
-        const objectHooks = { ...instance.hooks } || {}
+        const disableContext = instance.disableContext || false
+
+        const functionHook = instance.hook
         const userHooks = Metadata.get(C.HOOK, prototype) || []
-        const hooks = [ ...Object.entries(objectHooks), ...userHooks ]
+
+        const hooks = functionHook
+            ? typeof functionHook === 'object'
+                ? [ ...Object.entries(functionHook), ...userHooks ]
+                : [ functionHook, ...userHooks ]
+            : userHooks
 
         const valueHandlers = Object.getOwnPropertyNames(instance)
             .filter(handler => !propertyHandlers.some(property => handler === property.property))
 
-        const callWithCtx = (ctx, next, handle) => {
-            const hooksResult = hooks.reduce((prevHook: object, hook: string | [string, (arg1: any, arg2: object) => void]) => {
+        const callWithCtx = (ctx, next, handle, type) => {
+            const hooksResult = hooks.reduce((prevHookResult: object, hook: string | [string, (arg1: any, arg2: object) => void] | Function) => {
                 if (Array.isArray(hook)) {
                     return {
-                        ...prevHook,
-                        [hook[0]]: hook[1](ctx, prevHook),
+                        ...prevHookResult,
+                        [hook[0]]: hook[1](ctx, prevHookResult),
+                    }
+                }
+                if (typeof hook === 'function') {
+                    return {
+                        ...prevHookResult,
+                        ...hook(ctx, prevHookResult),
                     }
                 }
                 return {
-                    ...prevHook,
-                    [hook]: instance[hook](ctx, prevHook),
+                    ...prevHookResult,
+                    [hook]: instance[hook](ctx, prevHookResult),
                 }
             }, {})
-            if (next) {
+            if (type === 'use') {
+                if (disableContext) {
+                    return handle(hooksResult, ctx, next)
+                }
                 return handle(ctx, next, hooksResult)
+            }
+            if (disableContext) {
+                return handle(hooksResult, ctx, next)
             }
             return handle(ctx, hooksResult)
         }
 
         valueHandlers.forEach(handler => {
             if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
-                entity[handler]((ctx, next) => callWithCtx(ctx, next, instance[handler]))
+                entity[handler]((ctx, next) => callWithCtx(ctx, next, instance[handler], handler))
             }
         })
 
         propertyHandlers.forEach(handler => {
             if (typeof entity[handler.type] === 'function' && typeof instance[handler.property] === 'function') {
                 if (handler.trigger) {
-                    entity[handler.type](handler.trigger, (ctx, next) => callWithCtx(ctx, next, instance[handler.property]))
+                    entity[handler.type](handler.trigger, (ctx, next) => callWithCtx(ctx, next, instance[handler.property], handler.property))
                 } else {
-                    entity[handler.type]((ctx, next) => callWithCtx(ctx, next, instance[handler.property]))
+                    entity[handler.type]((ctx, next) => callWithCtx(ctx, next, instance[handler.property], handler.property))
                 }
             }
         })
@@ -136,7 +156,7 @@ export class ModuleLoader {
         methodHandlers.forEach(handler => {
             const middlewares = Metadata.get(C.MIDDLEWARES, handler.handler)
 
-            const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance))
+            const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance), handler.type)
 
             if (handler.trigger) {
                 if (middlewares) {

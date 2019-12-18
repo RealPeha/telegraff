@@ -12,4 +12,10 @@ export const Injectable = () => (constructor) => {
     injector.dependencies.set(constructor, {
         instance: null,
     });
+
+    const instance = injector.instantiateDependency(constructor)
+
+    return Object.assign(constructor, class {
+        static instance = instance
+    })
 }
