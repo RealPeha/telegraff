@@ -102,56 +102,88 @@ export class ModuleLoader {
             ? typeof functionHook === 'object'
                 ? [ ...Object.entries(functionHook), ...userHooks ]
                 : [ functionHook, ...userHooks ]
-            : userHooks
+            : [ ...userHooks ]
 
         const valueHandlers = Object.getOwnPropertyNames(instance)
             .filter(handler => !propertyHandlers.some(property => handler === property.property))
 
-        const callWithCtx = (ctx, next, handle, type) => {
-            const hooksResult = hooks.reduce((prevHookResult: object, hook: string | [string, (arg1: any, arg2: object) => void] | Function) => {
-                if (Array.isArray(hook)) {
+        const callHooks = (ctx) => {
+            return hooks.reduce((prevHookResult: object, hook: string | [string, (arg1: any, arg2: object) => void] | Function) => {
+                try {
+                    if (Array.isArray(hook)) {
+                        if (typeof hook[1] !== 'function') {
+                            throw {error: new Error(`Hook [${hook[0]}] must be a function`)}
+                        }
+                        return {
+                            ...prevHookResult,
+                            [hook[0]]: hook[1](ctx, prevHookResult),
+                        }
+                    }
+                    if (typeof hook === 'function') {
+                        return {
+                            ...prevHookResult,
+                            ...hook(ctx, prevHookResult),
+                        }
+                    }
+                    if (typeof instance[hook] !== 'function') {
+                        throw {error: new Error(`Hook [${hook}] must be a function`)}
+                    }
                     return {
                         ...prevHookResult,
-                        [hook[0]]: hook[1](ctx, prevHookResult),
+                        [hook]: instance[hook](ctx, prevHookResult),
                     }
                 }
-                if (typeof hook === 'function') {
-                    return {
-                        ...prevHookResult,
-                        ...hook(ctx, prevHookResult),
+                catch(err) {
+                    if (err.error) {
+                        console.log(err.error)
                     }
-                }
-                return {
-                    ...prevHookResult,
-                    [hook]: instance[hook](ctx, prevHookResult),
+                    return prevHookResult
                 }
             }, {})
-            const context = bindHooks ? hooksResult : instance
+        }
+
+        const callWithBindHook = (ctx, next, handle, type) => {
+            const hooksResult = callHooks(ctx)
+            try {
+                if (type === 'use') {
+                    return disableContext
+                        ? bindHooks ? bind(handle, hooksResult, ctx, next).call(hooksResult) : handle(hooksResult, ctx, next)
+                        : bindHooks ? bind(handle, ctx, next, hooksResult).call(hooksResult) : handle(ctx, next, hooksResult)
+                }
+                return disableContext
+                    ? bindHooks ? bind(handle, hooksResult, ctx, next).call(hooksResult) : handle(hooksResult, ctx, next)
+                    : bindHooks ? bind(handle, ctx, hooksResult).call(hooksResult) : handle(ctx, hooksResult)
+            } catch {
+                // if use helper
+                return handle(ctx, next, hooksResult)
+            }
+        }
+
+        const callMethod = (ctx, next, handle, type) => {
+            const hooksResult = callHooks(ctx)
 
             if (type === 'use') {
-                if (disableContext) {
-                    return bind(handle, hooksResult, ctx, next).call(context)
-                }
-                return bind(handle, ctx, next, hooksResult).call(context)
+                return disableContext
+                    ? handle(hooksResult, ctx, next)
+                    : handle(ctx, next, hooksResult)
             }
-            if (disableContext) {
-                return bind(handle, hooksResult, ctx, next).call(context)
-            }
-            return bind(handle, ctx, hooksResult).call(context)
+            return disableContext
+                ? handle(hooksResult, ctx)
+                : handle(ctx, hooksResult)
         }
 
         valueHandlers.forEach(handler => {
             if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
-                entity[handler]((ctx, next) => callWithCtx(ctx, next, instance[handler], handler))
+                entity[handler]((ctx, next) => callWithBindHook(ctx, next, instance[handler], handler))
             }
         })
 
         propertyHandlers.forEach(handler => {
             if (typeof entity[handler.type] === 'function' && typeof instance[handler.property] === 'function') {
                 if (handler.trigger) {
-                    entity[handler.type](handler.trigger, (ctx, next) => callWithCtx(ctx, next, instance[handler.property], handler.property))
+                    entity[handler.type](handler.trigger, (ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
                 } else {
-                    entity[handler.type]((ctx, next) => callWithCtx(ctx, next, instance[handler.property], handler.property))
+                    entity[handler.type]((ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
                 }
             }
         })
@@ -159,8 +191,7 @@ export class ModuleLoader {
         methodHandlers.forEach(handler => {
             const middlewares = Metadata.get(C.MIDDLEWARES, handler.handler)
 
-            // const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance), handler.type)
-            const bindHandler = handler.handler.bind(instance)
+            const bindHandler = (ctx, next) => callMethod(ctx, next, handler.handler.bind(instance), handler.type)
 
             if (handler.trigger) {
                 if (middlewares) {
