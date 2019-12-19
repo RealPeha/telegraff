@@ -1,5 +1,5 @@
 import { session } from 'telegraf'
-import { Bot, Scene, Start, UseMiddlewares } from '../../src'
+import { Bot, Scene, Injectable } from '../../src'
 import { command, on, start, hook } from '../../src/common/property'
 import { enter, leave, reply } from '../../src/helpers'
 import hooks from '../../src/hooks'
@@ -17,19 +17,18 @@ class WelcomeScene {
     scenes: [ WelcomeScene ],
 })
 export class BotModule {
-    static token = '775220275:AAFtbkf4KTjjm19ud4u-kWBFpjd5y7wSBfw'
+    static token = process.env.BOT_TOKEN
 
     disableContext = true // For hook only style. move context to second argument, hooks are now on the first
     bindHooks = true // bind hooks result as context to all handlers, now available from this
     hook = hooks // connect a set of built-in hooks, we will use reply hook
 
-    // @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name || ''}`
+    @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name || ''}`
 
-    // @start start = ({ reply, fullName }) => {
-    //     console.log(this)
-    //     reply(`Hello ${fullName}! Try /go`)
-    // }
+    @start start = ({ reply, fullName }) => {
+        console.log(this)
+        reply(`Hello ${fullName}! Try /go`)
+    }
     @command go = enter('test')
     @on message = reply('Я не понимаю тебя')
-    catch = err => console.log(err)
 }

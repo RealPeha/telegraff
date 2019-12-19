@@ -2,7 +2,7 @@ import { BaseScene, Stage, Middleware, ContextMessageUpdate, SceneContextMessage
 import * as WizardScene from 'telegraf/scenes/wizard'
 
 import { BotContainer } from './bot-container';
-import { Metadata } from './utils';
+import { Metadata, bindArrow as bind } from './utils';
 import * as C from './constants';
 import { injector } from './injector';
 import { BotInstance } from './bot-instance';
@@ -93,6 +93,7 @@ export class ModuleLoader {
         const propertyHandlers = Metadata.get(C.PROPERTY_HANDLER, prototype) || []
 
         const disableContext = instance.disableContext || false
+        const bindHooks = instance.bindHooks || false
 
         const functionHook = instance.hook
         const userHooks = Metadata.get(C.HOOK, prototype) || []
@@ -125,16 +126,18 @@ export class ModuleLoader {
                     [hook]: instance[hook](ctx, prevHookResult),
                 }
             }, {})
+            const context = bindHooks ? hooksResult : instance
+
             if (type === 'use') {
                 if (disableContext) {
-                    return handle(hooksResult, ctx, next)
+                    return bind(handle, hooksResult, ctx, next).call(context)
                 }
-                return handle(ctx, next, hooksResult)
+                return bind(handle, ctx, next, hooksResult).call(context)
             }
             if (disableContext) {
-                return handle(hooksResult, ctx, next)
+                return bind(handle, hooksResult, ctx, next).call(context)
             }
-            return handle(ctx, hooksResult)
+            return bind(handle, ctx, hooksResult).call(context)
         }
 
         valueHandlers.forEach(handler => {
@@ -156,7 +159,8 @@ export class ModuleLoader {
         methodHandlers.forEach(handler => {
             const middlewares = Metadata.get(C.MIDDLEWARES, handler.handler)
 
-            const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance), handler.type)
+            // const bindHandler = (ctx, next) => callWithCtx(ctx, next, handler.handler.bind(instance), handler.type)
+            const bindHandler = handler.handler.bind(instance)
 
             if (handler.trigger) {
                 if (middlewares) {
