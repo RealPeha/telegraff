@@ -8,3 +8,4 @@ export * from './bot-instance';
 export * from './constants';
 export * from './module-loader';
 export * from './injector';
+export * from './static';

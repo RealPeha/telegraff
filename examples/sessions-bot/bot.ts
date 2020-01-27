@@ -1,5 +1,4 @@
-import { session } from 'telegraf'
-import { Bot, Scene, onCatch } from '../../src'
+import { Bot, Scene, Solo } from '../../src'
 import { command, on, start, hook } from '../../src/common/property'
 import { enter, leave, reply } from '../../src/helpers'
 
@@ -12,18 +11,19 @@ class WelcomeScene {
 }
 
 @Bot({
-    middlewares: [ session() ],
     scenes: [ WelcomeScene ],
 })
-export class BotModule {
+class BotModule extends Solo {
     static token = process.env.BOT_TOKEN
+    static sessions = true
 
-    bindHooks = true // bind hooks result as context to all handlers, now available from this
+    bindHooks = true;
 
     @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name || ''}`
 
     @start start = ({ reply }) => reply(`Hello ${this.fullName}! Try /go`)
     @command go = enter('test')
     @on message = 'Я не понимаю тебя' // auto reply if only string as value
-    @onCatch e = console.log
 }
+
+BotModule.launch()

@@ -1,4 +1,4 @@
-import { BaseScene, Stage, Middleware, ContextMessageUpdate, SceneContextMessageUpdate, Composer } from 'telegraf';
+import { BaseScene, Stage, Middleware, ContextMessageUpdate, SceneContextMessageUpdate, Composer, session } from 'telegraf';
 import * as WizardScene from 'telegraf/scenes/wizard'
 
 import { BotContainer } from './bot-container';
@@ -13,6 +13,18 @@ export class ModuleLoader {
 
     loadMiddlewares(module: any): void {
         const bot: BotInstance = this.container.getBot();
+
+        if (module.sessions) {
+
+            const userProps = typeof module.sessions === 'object' ? module.sessions : {};
+            const sessionProps = {
+                property: 'session',
+                store: new Map(),
+                getSessionKey: (ctx) => ctx.from && ctx.chat && `${ctx.from.id}:${ctx.chat.id}`,
+                ...userProps,
+            }
+            bot.instance.use(session(sessionProps));
+        }
 
         const moduleMiddlewares: Middleware<ContextMessageUpdate>[] = Metadata.get(C.BOT_DATA, module.prototype).middlewares;
         if (moduleMiddlewares && Array.isArray(moduleMiddlewares)) {
