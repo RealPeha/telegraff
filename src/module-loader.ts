@@ -6,7 +6,7 @@ import { Metadata, bindArrow as bind } from './utils';
 import * as C from './constants';
 import { injector } from './injector';
 import { BotInstance } from './bot-instance';
-// const { parse } = require('regexp-tree')
+import { reply } from './/helpers';
 
 export class ModuleLoader {
     constructor(private readonly container: BotContainer) {}
@@ -179,11 +179,19 @@ export class ModuleLoader {
         })
 
         propertyHandlers.forEach(handler => {
-            if (typeof entity[handler.type] === 'function' && typeof instance[handler.property] === 'function') {
-                if (handler.trigger) {
-                    entity[handler.type](handler.trigger, (ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
-                } else {
-                    entity[handler.type]((ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
+            if (typeof entity[handler.type] === 'function') {
+                if (typeof instance[handler.property] === 'function') {
+                    if (handler.trigger) {
+                        entity[handler.type](handler.trigger, (ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
+                    } else {
+                        entity[handler.type]((ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
+                    }
+                } else if (typeof instance[handler.property] === 'string') {
+                    if (handler.trigger) {
+                        entity[handler.type](handler.trigger, reply(instance[handler.property]))
+                    } else {
+                        entity[handler.type](reply(instance[handler.property]))
+                    }
                 }
             }
         })

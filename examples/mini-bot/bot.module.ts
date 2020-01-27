@@ -24,6 +24,6 @@ export class BotModule {
 
     @start start = ({ reply }) => reply(`Hello ${this.fullName}! Try /go`)
     @command go = enter('test')
-    @on message = reply('Я не понимаю тебя')
+    @on message = 'Я не понимаю тебя' // auto reply if only string as value
     catch = err => console.log(err)
 }
