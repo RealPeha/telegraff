@@ -1,19 +1,19 @@
 ## Telegraff
 A progressive Node.js framework for building bots using Typescript decorators. Based on [Telegraf](https://github.com/telegraf/telegraf "Telegraf")
 
-### Новые функции в дополнении к функциям из Telegraff
-- Внедрение зависимостей (сервисы)
-- Хуки
-- Глобальный extra параметр (больше никаких replyWithHTML)
+### New features in addition to features from Telegraff
+- Dependency injection (services)
+- Hooks
+- Global extra parameter (no more replyWithHTML)
 
-### Установка
+### Installation
 
 ```
 $ yarn add telegraff
 ```
 
-### Простой пример бота на методах
-Больше примеров Вы можете увидеть в папке [examples](https://github.com/RealPeha/telegraff/tree/master/examples "examples")
+### A simple example of a bot on methods
+You can see more examples in the folder [examples](https://github.com/RealPeha/telegraff/tree/master/examples "examples")
 
 ```javascript
 import { session } from 'telegraf';
@@ -41,7 +41,7 @@ bot.setGlobalParseMode('HTML') // глобальный parse_mode для reply
 bot.launch()
 ```
 
-### Пример бота на свойствах
+### Example bot on properties
 ```javascript
 import { session } from 'telegraf';
 import { BotFactory, Bot, hears, command } from 'telegraff';
@@ -63,8 +63,8 @@ bot.setGlobalParseMode('HTML')
 bot.launch()
 ```
 
-### Создание бота
-Для создания бота используется метод create фабрики BotFactory. Первым аргументом принимает модуль бота, вторым необязательным токен. Если токен не указан, то он берется из статического свойства token в модуле
+### Bot creation
+To create a bot, use the create method of the BotFactory factory. The bot module takes the first argument, the second optional token. If the token is not specified, then it is taken from the static token property in the module
 ```javascript
 import { Bot, BotFactory } from 'telegraff';
 
@@ -78,10 +78,10 @@ bot.setGlobalParseMode('HTML')
 bot.launch()
 ```
 
-### Обработчики
-- объявление обработчиков методами класса с применением декораторов
+### Handlers
+- declaring handlers class methods using decorators
 
-Название декораторов совпадает с названием обработчика в Telegraf. Например обработчкик bot.start() -> декоратор Start и т.д. по логике
+The name of the decorators matches the name of the handler in Telegraf. For example, processing bot.start () -> Start decorator, etc. by logic
 ```javascript
 import { Start, Hears } from 'telegraff' // or from 'telegraff/common/method'
 class BotModule {
@@ -96,9 +96,9 @@ class BotModule {
     }
 }
 ```
-- объявление обработчиков свойствами класса
+- declaring handlers class properties
 
-Обработчика которые не требуют никаких дополнительных входных данных (start, enter, leave и т.д.) могут объявлятся без использования декоратора. Аналогично название декораторов совпадает с названием обработчика в Telegraf. Например обработчкик bot.start() -> декоратор start и т.д. по логике
+Handlers that do not require any additional input (start, enter, leave, etc.) can be declared without using a decorator. Similarly, the name of the decorators matches the name of the handler in Telegraf. For example, processing bot.start () -> start decorator, etc. by logic
 ```javascript
 import { start, hears, command } from 'telegraff' // or from 'telegraff/common/property'
 class BotModule {
@@ -110,18 +110,18 @@ class BotModule {
     @command lol = ({ reply }) => reply('42')
 }
 ```
-### Хуки
-Хук - это функция, которая имеет доступ к текущему контекту. Чтобы в каждом обработчике не обращаться по длинному путю в контекст, с помощью хука вы можете создать набор определенных сокращений.
+### Hooks
+A hook is a function that has access to the current context. To prevent each handler from accessing the long path to the context, you can use the hook to create a set of specific abbreviations.
 
-##### Три способа объявления хука
-- с помощью декоратора @hook
+##### Three ways to declare a hook
+- using the @hook decorator
 ```javascript
 class BotModule {
     @hook id = ctx => ctx.from.id
     @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name}`
 }
 ```
-- объявить свойство hook как функцию принимающею текущий контекст и вовращающую объект
+- declare the hook property as a function that accepts the current context and rotates the object
 ```javascript
 class BotModule {
     hook = ctx = ({
@@ -129,9 +129,10 @@ class BotModule {
         fullName: `${ctx.from.first_name} ${ctx.from.last_name}`,
     })
 }
-Преимущество этого подхода в том, что это один хук, т.е. один вызов в отличии от первого вариант где каждых хук это отдельная функция
 ```
-- объявить свойство hook как объект свойства которого возвращаюют функции
+The advantage of this approach is that it is one hook, that is, one call, unlike the first option, where each hook is a separate function
+
+- declare a hook property as a property object which functions return
 ```javascript
 class BotModule {
     hook = {
@@ -141,51 +142,51 @@ class BotModule {
 }
 ```
 
-Использование хуков во всех трех вариантах остается одинаковым. Можно совмещать хуки декораторами и свойствами
+The use of hooks in all three cases remains the same. You can combine hooks with decorators and properties
 
-##### Три способа использования хуков
-- вариант похожий на первый, но с включенной опцией <b>disableContext</b>
+##### Three ways to use hooks
+- option similar to the first, but with the <b> disableContext </b> option enabled
 
-Если вы часто используете хуки, то может быть ситуация, когда вы не используете контекст. И если вы включите опцию disableContext, то порядок аргументов обработчкив меняется так, что хуки стают первыми
+If you often use hooks, then there may be a situation where you are not using context. And if you enable the disableContext option, the order of the processing arguments changes so that the hooks become the first
 ```javascript
 class BotModule {
-    disableContext = true // включаем опцию disableContext
+    disableContext = true // enable the disableContext option
 
     @hook username = ctx => ctx.from.username
-    @hook reply = (..args) => ctx => ctx.reply(...args) // превращает метод контекста в хук
+    @hook reply = (..args) => ctx => ctx.reply(...args) // turns the context method into a hook
 
-    start = ({ reply, username }, ctx) => reply(`Hello ${username}`) // ctx не используется - можно убрать
-    start = (ctx, { reply, username }) => reply(`Hello ${username}`) // так было бы с выключенной опцией disableContext
+    start = ({ reply, username }, ctx) => reply(`Hello ${username}`) // ctx not used - can be removed
+    start = (ctx, { reply, username }) => reply(`Hello ${username}`) // so it would be with the disableContext option turned off
 }
 ```
-- результат хуков попадает вторым аргументом во всех обработчиках кроме use - там он третьим
+- the result of hooks gets the second argument in all handlers except use - there it is the third
 ```javascript
 class BotModule {
     @hook username = ctx => ctx.from.username
 
     start = (ctx, hooks) => ctx.reply(`Hello ${hooks.username}`)
 
-    // или используйте декструктуризацию чтобы сделать код короче и понятней
+    // or use destructuring to make the code shorter and clearer
     @command = ({ reply }, { username }) => reply(`Hello ${username}`)
 }
 ```
-- результат хуков помещается в this каждого обработчика
+- the result of hooks is placed in this of each handler
 
-Для этого необходимо включить опцию <b>bindHooks</b>
+To do this, enable the <b> bindHooks </b> option
 ```javascript
 class BotModule {
-    bindHooks = true // включаем опцию
+    bindHooks = true // enable option
 
     @hook username = ctx => ctx.from.username
 
-    start = ({ reply }) => reply(`Hello ${this.username}`) // выглядит еще лучше
+    start = ({ reply }) => reply(`Hello ${this.username}`) // looks even better
 }
 ```
 
 ##### bindHooks
-Включение этой опции пробрасывает хуки как контекст в каждый метод и они доступны через this. Это удобно, чтобы не делать каждый раз декструктуризацию хуков особенно если их у вас много
+Enabling this option throws hooks as context into each method and they are accessible through this. It’s convenient not to do destructuring hooks every time, especially if you have a lot of them
 
-Но появляется проблема в виде потери контекст модуля в обработчике. Это значит что если вы используете внедрение зависимостей, то сервис станет недоступым.
+But there is a problem in the form of loss of the module context in the handler. This means that if you use dependency injection, the service will become unavailable.
 ```javascript
 class BotModule {
     constructor (private readonly testService: TestService) {}
@@ -195,12 +196,12 @@ class BotModule {
 
     start = ({ reply }) => {
         reply(`Hello ${this.username}`)
-        this.testService.log('user start') // получим ошибку т.к. теряется контекст модуля и больше не существует this.testService
+        this.testService.log('user start') // we get an error because the module context is lost and no longer exists this.testService
     }
 }
 ```
 
-Но эту проблему можно легко лешить путем проброса сервиса через хук
+But this problem can be easily solved by forwarding the service through a hook
 ```javascript
 class BotModule {
     constructor (private readonly testService: TestService) {}
@@ -211,12 +212,12 @@ class BotModule {
 
     start = ({ reply }) => {
         reply(`Hello ${this.username}`)
-        this.testService.log('user start') // теперь всё работает отлично!
+        this.testService.log('user start') // now everything works fine!
     }
 }
 ```
 
-Хуки мощный инструмент позволяющий не только прокидывать какие-то данные из контекста, но и создавать переиспользуемые функции в разных модулях, например
+Hooks are a powerful tool that allows not only to throw some data from the context, but also to create reusable functions in different modules, for example
 ```javascript
 const saveUser = () => async ctx => {
     if (ctx.session.user) {
@@ -238,9 +239,9 @@ class BotModule {
 }
 ```
 
-### Наследование
+### Inheritance
 
-Если некоторые модули имеют общие обработчики или вы хотите использовать в них общие хуки, то вы можете создать отдельный класс, которым вы будете расширять ваши модули
+If some modules have common handlers or you want to use common hooks in them, then you can create a separate class with which you will expand your modules
 ```javascript
 class Hooks {
     @hook username = ctx.from.username
@@ -255,16 +256,18 @@ class BotModule extends Hooks {
 }
 ```
 
-### Другие примеры
-Эти примеры написаны с использованием обработчиков на методах. Они легко могут быть переписаны на обработчики на свойствах
-#### Создание сцен
+### Other examples
+
+These examples are written using method handlers. They can easily be rewritten to property handlers.
+
+#### Creating scenes
 ```javascript
 // welcome-scene.ts
 import { Scene, Enter } from 'telegraff'
 
 @Scene('welcome')
 export class WelcomeScene {
-    static default = false // устанавливание сцену по умолчанию
+    static default = false // set the default scene
 
     @Enter()
     enter({ reply }) {
@@ -291,7 +294,7 @@ export class BotModule {
 }
 ```
 
-#### Внедрение зависимостей (сервисы)
+#### Dependency injection (services)
 ```javascript
 // db-service.ts
 import { Injectable, Enter } from 'telegraff'
@@ -329,9 +332,27 @@ export class BotModule {
 }
 ```
 
-#### Устанавливаем глобальный parse_mode
+#### Set global parse_mode
 ```javascript
 const bot = BotFactory.create(BotModule, token)
 bot.setGlobalParseMode('HTML')
 bot.launch()
+```
+
+#### Automatic reply
+```javascript
+class BotModule {
+    start = 'Hello' // reply('Hello')
+}
+```
+
+#### Template string
+```javascript
+class BotModule {
+    @hook getText = ({ from }) => `user: ${from.username}` // hook
+    
+    @command ping = ({ reply }, { getText }) => reply(getText)
+    // vs
+    @command ping2 = '#{getText}'
+}
 ```
