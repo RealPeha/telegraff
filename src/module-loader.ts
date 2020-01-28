@@ -149,6 +149,7 @@ export class ModuleLoader {
                     if (err.error) {
                         console.log(err.error)
                     }
+
                     return prevHookResult
                 }
             }, {})
@@ -156,6 +157,7 @@ export class ModuleLoader {
 
         const callWithBindHook = (ctx, next, handle, type) => {
             const hooksResult = callHooks(ctx)
+
             try {
                 if (type === 'use') {
                     return disableContext
@@ -184,6 +186,30 @@ export class ModuleLoader {
                 : handle(ctx, hooksResult)
         }
 
+        const format = (ctx, str, args = {}, template = /\#{([0-9a-zA-Z_]+)\}/g) => {
+            return str.replace(template, (match, prop, index) => {
+                if (str[index - 1] === "{" && str[index + match.length] === "}") {
+                    return prop
+                } else {
+                    let result;
+
+                    if (args.hasOwnProperty(prop)) {
+                        if (typeof instance[prop] === 'function') {
+                            result = instance[prop](ctx)
+                        } else {
+                            result = instance[prop]
+                        }
+                    }
+
+                    if (result === null || result === undefined) {
+                        return ''
+                    }
+
+                    return result
+                }
+            })
+        }
+
         valueHandlers.forEach(handler => {
             if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
                 entity[handler]((ctx, next) => callWithBindHook(ctx, next, instance[handler], handler))
@@ -193,16 +219,20 @@ export class ModuleLoader {
         propertyHandlers.forEach(handler => {
             if (typeof entity[handler.type] === 'function') {
                 if (typeof instance[handler.property] === 'function') {
+                    const sendReply = (ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property);
+
                     if (handler.trigger) {
-                        entity[handler.type](handler.trigger, (ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
+                        entity[handler.type](handler.trigger, sendReply)
                     } else {
-                        entity[handler.type]((ctx, next) => callWithBindHook(ctx, next, instance[handler.property], handler.property))
+                        entity[handler.type](sendReply)
                     }
                 } else if (typeof instance[handler.property] === 'string') {
+                    const sendReply = ctx => ctx.reply(format(ctx, instance[handler.property], { ...instance }));
+
                     if (handler.trigger) {
-                        entity[handler.type](handler.trigger, reply(instance[handler.property]))
+                        entity[handler.type](handler.trigger, sendReply)
                     } else {
-                        entity[handler.type](reply(instance[handler.property]))
+                        entity[handler.type](sendReply)
                     }
                 }
             }

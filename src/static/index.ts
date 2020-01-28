@@ -1,4 +1,4 @@
-export class Solo {
+export class Launch {
     static launch: any
     static bot: any
 }

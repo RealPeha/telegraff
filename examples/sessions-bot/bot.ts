@@ -1,29 +1,27 @@
-import { Bot, Scene, Solo } from '../../src'
+import { Bot, Scene, Launch } from '../../src'
 import { command, on, start, hook } from '../../src/common/property'
-import { enter, leave, reply } from '../../src/helpers'
+import { enter, leave } from '../../src/helpers'
 
 @Scene('test')
 class WelcomeScene {
-    enter = reply('Добро пожаловать! Введи /hello или /goodbye')
-    leave = reply('Пока')
-    @command hello = reply('Привет!')
+    enter = 'Добро пожаловать! Введи /hello или /goodbye'
+    leave = 'Пока'
+    @command hello = 'Привет!'
     @command goodbye = leave()
 }
 
 @Bot({
     scenes: [ WelcomeScene ],
 })
-class BotModule extends Solo {
+class BotModule extends Launch {
     static token = process.env.BOT_TOKEN
     static sessions = true
 
-    bindHooks = true;
-
     @hook fullName = ctx => `${ctx.from.first_name} ${ctx.from.last_name || ''}`
 
-    @start start = ({ reply }) => reply(`Hello ${this.fullName}! Try /go`)
+    @start start = 'Hello #{fullName}! Try /go' // string template. #{fullName} replaced with hook fullName result
     @command go = enter('test')
-    @on message = 'Я не понимаю тебя' // auto reply if only string as value
+    @on message = '42'
 }
 
 BotModule.launch()
