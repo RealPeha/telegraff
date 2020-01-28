@@ -1,5 +1,5 @@
 ## Telegraff
-A progressive Node.js framework for building bots using Typescript decorators. Based on [Telegraf](https://github.com/telegraf/telegraf "Telegraf")
+A progressive Node.js Telegram Bot framework for building bots using Typescript decorators. Based on [Telegraf](https://github.com/telegraf/telegraf "Telegraf")
 
 ### New features in addition to features from Telegraff
 - Dependency injection (services)
