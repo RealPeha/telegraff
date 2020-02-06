@@ -218,7 +218,7 @@ export class ModuleLoader {
                         entity[handler.type](sendReply)
                     }
                 } else if (Array.isArray(instance[handler.property])) {
-                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler.property].shift()), instance[handler.property]);
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler.property].shift()), ...instance[handler.property]);
 
                     if (handler.trigger) {
                         entity[handler.type](handler.trigger, sendReply)
