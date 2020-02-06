@@ -194,8 +194,17 @@ export class ModuleLoader {
         }
 
         valueHandlers.forEach(handler => {
-            if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
-                entity[handler]((ctx, next) => callWithBindHook(ctx, next, instance[handler], handler))
+            if (typeof entity[handler] === 'function') {
+                if (typeof instance[handler] === 'function') {
+                    entity[handler]((ctx, next) => callWithBindHook(ctx, next, instance[handler], handler))
+                } else if (typeof instance[handler] === 'string') {
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler]));
+                    entity[handler](sendReply)
+                } else if (Array.isArray(instance[handler])) {
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler].shift()), ...instance[handler]);
+
+                    entity[handler](sendReply)
+                }
             }
         })
 
