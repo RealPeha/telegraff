@@ -1,6 +1,6 @@
 {
   "name": "telegraff",
-  "version": "1.2.11",
+  "version": "1.2.2",
   "main": "index.js",
   "types": "index.d.ts",
   "author": "Stanislav Kardash <real.peha@gmail.com>",
