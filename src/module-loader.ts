@@ -6,7 +6,7 @@ import { Metadata, bindArrow as bind } from './utils';
 import * as C from './constants';
 import { injector } from './injector';
 import { BotInstance } from './bot-instance';
-import { reply } from './/helpers';
+import { format } from './hooks';
 
 export class ModuleLoader {
     constructor(private readonly container: BotContainer) {}
@@ -39,11 +39,14 @@ export class ModuleLoader {
 
         const moduleScenes = Metadata.get(C.BOT_DATA, module.prototype).scenes;
         if (moduleScenes) {
-            let defaultScene;
+            let defaultScene; // shit
+            let stageOptions = {}; // shit
+
             const scenes = moduleScenes.map(moduleScene => {
                 if (Metadata.get(C.WIZARD_SCENE, moduleScene.prototype)) {
                     const sceneName: string = Metadata.get(C.WIZARD_SCENE, moduleScene.prototype)
-                    defaultScene = moduleScene.default && sceneName
+                    defaultScene = moduleScene.default && sceneName // shit
+                    stageOptions = moduleScene.stageOptions || {} // shit
                     const methodsName = Object.getOwnPropertyNames(moduleScene.prototype).filter(name => name !== 'constructor')
                     const methods = methodsName.map(name => moduleScene.prototype[name])
 
@@ -53,16 +56,20 @@ export class ModuleLoader {
                     const sceneName: string = Metadata.get(C.SCENE, moduleScene.prototype)
                     const sceneOptions = moduleScene.options || {}
 
-                    defaultScene = moduleScene.default && sceneName
+                    defaultScene = moduleScene.default && sceneName // shit
+                    stageOptions = moduleScene.stageOptions || {} // shit
 
                     const scene: BaseScene<SceneContextMessageUpdate> = new BaseScene(sceneName, sceneOptions)
                     this.loadSceneMetadata(scene, moduleScene)
                     return scene
                 }
             })
+
             const stage = new Stage(scenes, {
                 default: defaultScene,
+                ...stageOptions,
             });
+
             bot.instance.use(stage.middleware());
         }
     }
@@ -186,30 +193,6 @@ export class ModuleLoader {
                 : handle(ctx, hooksResult)
         }
 
-        const format = (ctx, str, args = {}, template = /\#{([0-9a-zA-Z_]+)\}/g) => {
-            return str.replace(template, (match, prop, index) => {
-                if (str[index - 1] === "{" && str[index + match.length] === "}") {
-                    return prop
-                } else {
-                    let result;
-
-                    if (args.hasOwnProperty(prop)) {
-                        if (typeof instance[prop] === 'function') {
-                            result = instance[prop](ctx)
-                        } else {
-                            result = instance[prop]
-                        }
-                    }
-
-                    if (result === null || result === undefined) {
-                        return ''
-                    }
-
-                    return result
-                }
-            })
-        }
-
         valueHandlers.forEach(handler => {
             if (typeof entity[handler] === 'function' && typeof instance[handler] === 'function') {
                 entity[handler]((ctx, next) => callWithBindHook(ctx, next, instance[handler], handler))
@@ -227,7 +210,7 @@ export class ModuleLoader {
                         entity[handler.type](sendReply)
                     }
                 } else if (typeof instance[handler.property] === 'string') {
-                    const sendReply = ctx => ctx.reply(format(ctx, instance[handler.property], { ...instance }));
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler.property]));
 
                     if (handler.trigger) {
                         entity[handler.type](handler.trigger, sendReply)
