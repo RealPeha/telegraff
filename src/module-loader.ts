@@ -46,7 +46,7 @@ export class ModuleLoader {
                 if (Metadata.get(C.WIZARD_SCENE, moduleScene.prototype)) {
                     const sceneName: string = Metadata.get(C.WIZARD_SCENE, moduleScene.prototype)
                     defaultScene = moduleScene.default && sceneName // shit
-                    stageOptions = moduleScene.stageOptions || {} // shit
+                    moduleScene.stageOptions && (stageOptions = moduleScene.stageOptions) // shit
                     const methodsName = Object.getOwnPropertyNames(moduleScene.prototype).filter(name => name !== 'constructor')
                     const methods = methodsName.map(name => moduleScene.prototype[name])
 
@@ -57,7 +57,7 @@ export class ModuleLoader {
                     const sceneOptions = moduleScene.options || {}
 
                     defaultScene = moduleScene.default && sceneName // shit
-                    stageOptions = moduleScene.stageOptions || {} // shit
+                    moduleScene.stageOptions && (stageOptions = moduleScene.stageOptions) // shit
 
                     const scene: BaseScene<SceneContextMessageUpdate> = new BaseScene(sceneName, sceneOptions)
                     this.loadSceneMetadata(scene, moduleScene)
