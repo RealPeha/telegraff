@@ -201,7 +201,8 @@ export class ModuleLoader {
                     const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler]));
                     entity[handler](sendReply)
                 } else if (Array.isArray(instance[handler])) {
-                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler].shift()), ...instance[handler]);
+                    const [text, ...rest] = instance[handler]
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(text), ...rest);
 
                     entity[handler](sendReply)
                 }
@@ -227,7 +228,8 @@ export class ModuleLoader {
                         entity[handler.type](sendReply)
                     }
                 } else if (Array.isArray(instance[handler.property])) {
-                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(instance[handler.property].shift()), ...instance[handler.property]);
+                    const [text, ...rest] = instance[handler]
+                    const sendReply = ctx => ctx.reply(format(instance)(ctx)(text), ...rest);
 
                     if (handler.trigger) {
                         entity[handler.type](handler.trigger, sendReply)
